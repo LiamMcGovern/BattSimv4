@@ -1,8 +1,12 @@
 package army;
 
 import actor.*;
-
-import java.util.ArrayList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TableView;
 
 /**
  * A reference to object of type <b>Army</b> contains the following instance fields. armyName, a String representation
@@ -23,16 +27,41 @@ public class Army {
     /**
      * armyForces will hold the 'Army' of Actor objects
      */
-    private ArrayList<Actor> armyForces;
+//    private ArrayList<Actor> armyForces;
 
     /**
      * <b>Army</b> constructor takes String armyName and to set the Army's name.
      *
      * @param armyName
      */
+
+
+
+    //-----------Java FX Stuff-------------~
+    private ObservableList<Actor> armyForces = FXCollections.observableArrayList(); //( new ArrayList<Actor>() ) ;
+
+    private ListView<Actor> listView;
+    private TableView<Actor> tableView;
+
+    //-----------Java FX Stuff------------//-|
+
+
+
     public Army(String armyName) {
         this.armyName = armyName;
-        armyForces = new ArrayList<Actor>();
+        //armyForces = new ArrayList<Actor>();
+        //tableView=new TableView<Actor>();
+
+        //-----------Java FX Stuff-------------~
+
+
+        //List View
+        listView=new ListView<Actor>();
+        listView.setItems(armyForces);
+        //Table View
+        tableView = Actor.createTable();
+        tableView.setItems(armyForces);
+        //-----------Java FX Stuff------------//-|
     }
 
     /**
@@ -44,8 +73,39 @@ public class Army {
      */
     public Army(String armyName, int quantityOfActors) {
         this.armyName = armyName;
-        armyForces = new ArrayList<Actor>(quantityOfActors);
+//        armyForces = new ArrayList<Actor>(quantityOfActors);
+
+        //-----------Java FX Stuff-------------~
+        //armyForces = new ArrayList<Actor>();
+        //armyForces = new ArrayList<Actor>();
+        //tableView=new TableView<Actor>();
+
+        //List View
+        listView=new ListView<Actor>();
+        listView.setItems(armyForces);
+        //Table View
+        tableView = Actor.createTable();
+        tableView.setItems(armyForces);
+        //-----------Java FX Stuff------------//-|
     }
+
+    //-----------Java FX Stuff-------------~
+    public void setArmyForces(ObservableList<Actor> armyForces) {
+        this.armyForces = armyForces;
+    }
+
+    public ObservableList<Actor> getArmyForces() {
+        return armyForces;
+    }
+    public TableView<Actor> getTableViewOfActors() {
+        return tableView;
+    }
+    public Node getListViewOfActors() {
+        return listView;
+    }
+    //-----------Java FX Stuff------------//-|
+
+
 
     /**
      * Populates the army with the provided arguments quantity. The choice of each is based on the probability of each
@@ -103,9 +163,16 @@ public class Army {
      * @param typeOfActor Type of Actor (defined in ActorFactor)
      * @param numToAdd    quantity of Actors to populate forces with.
      */
-    public void populate(ActorFactory.Type typeOfActor, int numToAdd) {
+    public void populate(ActorFactory.Type typeOfActor, int numToAdd, ObservableList<Node> listChildNodes) {
         for (int i = 0; i < numToAdd; i++) {
-            armyForces.add(typeOfActor.create(this));
+//            armyForces.add(typeOfActor.create(this));
+
+            Actor tempActor = typeOfActor.create(this);
+            //armyForces.add(tempActor);
+            armyForces.add(tempActor);
+            tempActor.setRandomLocationAroundPoint(new Point2D(Math.random()*800.0+30.0, Math.random()*100.0+23), 4.0);
+            listChildNodes.add(tempActor.getBattlefieldAvatar());
+
         }
     }
 
@@ -125,7 +192,7 @@ public class Army {
      * Display each Actor to console (via toString)
      */
     public void display() {
-        System.out.printf("Displaying %s's Forces", this.getArmyName());
+        System.out.printf("Displaying %s's Forces", this.getName());
         for (Actor iActor : armyForces) {
             System.out.println(iActor);
         }
@@ -136,21 +203,22 @@ public class Army {
      *
      * @return Returns the quantity of Actors in the Army.
      */
-    public int size() {
+    public int getSize() {
         return armyForces.size();
     }
 
     /**
      * @return Returns the ArrayList object of the Army's Actor's
      */
-    public ArrayList<Actor> getArmyForces() {
-        return armyForces;
-    }
+
+//    public ArrayList<Actor> getArmyForces() {
+//        return armyForces;
+//    }
 
     /**
      * @return Returns the String representation of the Army
      */
-    public String getArmyName() {
+    public String getName() {
         return armyName;
     }
 
@@ -159,9 +227,9 @@ public class Army {
      *
      * @param armyForces
      */
-    public void setArmyForces(ArrayList<Actor> armyForces) {
-        this.armyForces = armyForces;
-    }
+//    public void setArmyForces(ArrayList<Actor> armyForces) {
+//        this.armyForces = armyForces;
+//    }
 
     /**
      * Simple method to assign the respective Army's name

@@ -2,6 +2,7 @@ package actor;
 
 import army.Army;
 import com.sun.javafx.fxml.builder.TriangleMeshBuilder;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CircleBuilder;
@@ -26,11 +27,11 @@ import util.InputGUI;
 
 public class Wizard extends Actor {
 
-    private boolean hasHorse;
+    private SimpleBooleanProperty hasHorse;
     /**
      * Represents <b>Wizards</b> possession of a horse.
      */
-    private boolean hasStaff;/** Represents <b>Wizards</b> possession of a staff. */
+    private SimpleBooleanProperty hasStaff;/** Represents <b>Wizards</b> possession of a staff. */
 
     /**
      * <b>Wizard</b>, inherits all attributes of <i>Actor</i> and two of it's own: <br> <u>hasHorse</u> a boolean value
@@ -116,7 +117,7 @@ public class Wizard extends Actor {
      * @return Returns a boolean value representing the <b>Wizards</b> possession of a Horse.
      */
     public boolean getHasHorse() {
-        return this.hasHorse;
+        return this.hasHorse.get();
     }
 
     /**
@@ -125,7 +126,7 @@ public class Wizard extends Actor {
      * @return Returns a boolean value representing the <b>Wizards</b> possession of a Staff.
      */
     public boolean getHasStaff() {
-        return this.hasStaff;
+        return this.hasStaff.get();
     }
 
     /**
@@ -134,7 +135,7 @@ public class Wizard extends Actor {
      * @param hasHorse Boolean value representing the possession of a Horse.
      */
     public void setHasHorse(boolean hasHorse) {
-        this.hasHorse = hasHorse;
+        this.hasHorse.set(hasHorse);
     }
 
     /**
@@ -143,7 +144,7 @@ public class Wizard extends Actor {
      * @param hasStaff Boolean value representing the possession of a Staff.
      */
     public void setHasStaff(boolean hasStaff) {
-        this.hasStaff = hasStaff;
+        this.hasStaff.set(hasStaff);
     }
 
 }

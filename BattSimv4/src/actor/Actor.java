@@ -6,13 +6,18 @@ import army.Army;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableDoubleValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 
+import javafx.util.Callback;
+import javafx.util.converter.DoubleStringConverter;
 import util.InputGUI;
 import util.SingletonRandom;
 
@@ -195,7 +200,7 @@ public abstract class Actor {
         return (actorAllegiance == null) ? String.format("Name: %-4s Health:%4.1f \t Speed:%4.1f \t Strength:%4.1f",
                 this.name.get(), this.health.get(), this.speed.get(), this.strength.get())
                 : String.format("Name: %-8s \t Army:%s \t Health:%4.1f \t Speed:%4.1f \t Strength:%4.1f",
-                this.name.get(), actorAllegiance.getArmyName(),this.health.get(),this.speed.get(),this.strength.get());
+                this.name.get(), actorAllegiance.getName(),this.health.get(),this.speed.get(),this.strength.get());
     }
 
     //----------get methods
@@ -236,10 +241,91 @@ public abstract class Actor {
         TableColumn<Actor, Double> healthCol    = new TableColumn<>("Health");    healthCol.setCellValueFactory
                 (new PropertyValueFactory<Actor, Double>("health"));    healthCol.setPrefWidth(PREF_WIDTH_DOUBLE);
         table.getColumns().addAll(nameCol, strengthCol, speedCol, healthCol);
+
+        // START CODE TEST: Following code DOES WORK, but it is NOT generic.
+        TableColumn locationXCol = new TableColumn("X");  locationXCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+        locationXCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Actor, Double>, ObservableDoubleValue>() {
+            public ObservableDoubleValue call(TableColumn.CellDataFeatures<Actor, Double> actor) { return actor.getValue().battlefieldAvatar.translateXProperty(); }});
+        TableColumn locationYCol = new TableColumn("Y");  locationYCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+        locationYCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Actor, Double>, ObservableDoubleValue>() {
+            public ObservableDoubleValue call(TableColumn.CellDataFeatures<Actor, Double> actor) { return actor.getValue().battlefieldAvatar.translateYProperty(); }});
+        // END CODE TEST: Following code DOES WORK, but it is NOT generic.
+
+
+        table.getColumns().addAll(nameCol, strengthCol, speedCol, healthCol, locationXCol, locationYCol);
+        nameCol.setCellFactory(TextFieldTableCell.<Actor>forTableColumn());
+        nameCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Actor, String>>()      { @Override public void handle(TableColumn.CellEditEvent<Actor, String> t) { Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow())); a.setName(t.getNewValue()); a.adjustAvatarBasedOnActorAttributes(); }}); // end setOnEditCommit()
+
+        strengthCol.setCellFactory(TextFieldTableCell.<Actor,Double>forTableColumn(new DoubleStringConverter()));
+        strengthCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Actor, Double>>()  {
+            @Override public void handle(TableColumn.CellEditEvent<Actor, Double> t) {
+                Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow()));
+                try {
+                    a.setStrength(t.getNewValue());
+                    a.adjustAvatarBasedOnActorAttributes();
+                } catch (IllegalArgumentException iae) {
+                    // change to property was rejected, so old value remains unchanged, but the TableView says otherwise
+                    Double d = t.getOldValue(); // No change to view, but it does retrieve the previous value.
+                    System.out.println(d);
+                }
+            }
+        }); // end setOnEditCommit()
+
+
+        speedCol.setCellFactory(TextFieldTableCell.<Actor,Double>forTableColumn(new DoubleStringConverter()));
+        speedCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Actor, Double>>()     { @Override public void handle(TableColumn.CellEditEvent<Actor, Double> t) { Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow())); a.setSpeed(t.getNewValue()); a.adjustAvatarBasedOnActorAttributes(); }}); // end setOnEditCommit()
+
+        healthCol.setCellFactory(TextFieldTableCell.<Actor,Double>forTableColumn(new DoubleStringConverter()));
+        healthCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Actor, Double>>()    { @Override public void handle(TableColumn.CellEditEvent<Actor, Double> t) { Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow())); a.setHealth(t.getNewValue()); a.adjustAvatarBasedOnActorAttributes(); }}); // end setOnEditCommit()
+
         return table; // end createTable()
     }
 
-
+//    public static TableView<Actor> createTable() {
+//        TableView<Actor> table = new TableView<Actor>();
+//        final double PREF_WIDTH_DOUBLE = 50.0;
+//        table.setPrefWidth(PREF_WIDTH_DOUBLE*8.0);
+//        table.setEditable(true);
+//        TableColumn<Actor, String> nameCol            = new TableColumn<>("Name");            nameCol.setCellValueFactory     (new PropertyValueFactory<Actor, String>("name"));        nameCol.setPrefWidth(PREF_WIDTH_DOUBLE*2.0);
+//        TableColumn<Actor, Double> strengthCol    = new TableColumn<>("Strength");    strengthCol.setCellValueFactory (new PropertyValueFactory<Actor, Double>("strength"));  strengthCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//        TableColumn<Actor, Double> speedCol            = new TableColumn<>("Speed");       speedCol.setCellValueFactory    (new PropertyValueFactory<Actor, Double>("speed"));     speedCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//        TableColumn<Actor, Double> healthCol        = new TableColumn<>("Health");      healthCol.setCellValueFactory   (new PropertyValueFactory<Actor, Double>("health"));    healthCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//
+//        // START CODE TEST: Following code DOES WORK, but it is NOT generic.
+//        TableColumn locationXCol = new TableColumn("X");  locationXCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//        locationXCol.setCellValueFactory(new Callback<CellDataFeatures<Actor, Double>, ObservableDoubleValue>() {
+//            public ObservableDoubleValue call(CellDataFeatures<Actor, Double> actor) { return actor.getValue().battlefieldAvatar.translateXProperty(); }});
+//        TableColumn locationYCol = new TableColumn("Y");  locationYCol.setPrefWidth(PREF_WIDTH_DOUBLE);
+//        locationYCol.setCellValueFactory(new Callback<CellDataFeatures<Actor, Double>, ObservableDoubleValue>() {
+//            public ObservableDoubleValue call(CellDataFeatures<Actor, Double> actor) { return actor.getValue().battlefieldAvatar.translateYProperty(); }});
+//        // END CODE TEST: Following code DOES WORK, but it is NOT generic.
+//
+//        table.getColumns().addAll(nameCol, strengthCol, speedCol, healthCol, locationXCol, locationYCol);
+//        nameCol.setCellFactory(TextFieldTableCell.<Actor>forTableColumn());
+//        nameCol.setOnEditCommit(new EventHandler<CellEditEvent<Actor, String>>()      { @Override public void handle(CellEditEvent<Actor, String> t) { Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow())); a.setName(t.getNewValue()); a.adjustAvatarBasedOnActorAttributes(); }}); // end setOnEditCommit()
+//
+//        strengthCol.setCellFactory(TextFieldTableCell.<Actor,Double>forTableColumn(new DoubleStringConverter()));
+//        strengthCol.setOnEditCommit(new EventHandler<CellEditEvent<Actor, Double>>()  {
+//            @Override public void handle(CellEditEvent<Actor, Double> t) {
+//                Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow()));
+//                try {
+//                    a.setStrength(t.getNewValue());
+//                    a.adjustAvatarBasedOnActorAttributes();
+//                } catch (IllegalArgumentException iae) {
+//                    // change to property was rejected, so old value remains unchanged, but the TableView says otherwise
+//                    Double d = t.getOldValue(); // No change to view, but it does retrieve the previous value.
+//                    System.out.println(d);
+//                }
+//            }
+//        }); // end setOnEditCommit()
+//
+//        speedCol.setCellFactory(TextFieldTableCell.<Actor,Double>forTableColumn(new DoubleStringConverter()));
+//        speedCol.setOnEditCommit(new EventHandler<CellEditEvent<Actor, Double>>()     { @Override public void handle(CellEditEvent<Actor, Double> t) { Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow())); a.setSpeed(t.getNewValue()); a.adjustAvatarBasedOnActorAttributes(); }}); // end setOnEditCommit()
+//
+//        healthCol.setCellFactory(TextFieldTableCell.<Actor,Double>forTableColumn(new DoubleStringConverter()));
+//        healthCol.setOnEditCommit(new EventHandler<CellEditEvent<Actor, Double>>()    { @Override public void handle(CellEditEvent<Actor, Double> t) { Actor a = (t.getTableView().getItems().get(t.getTablePosition().getRow())); a.setHealth(t.getNewValue()); a.adjustAvatarBasedOnActorAttributes(); }}); // end setOnEditCommit()
+//        return table;
+//    } // end createTable()
 
 
     //-----------END Java FX Stuff------------//-|
